@@ -4,6 +4,8 @@ This proposal specifies the changes required to the [C# 6.0 (draft) Language spe
 
 ## Changes to [Lexical structure](../../spec/lexical-structure.md)
 
+### Literals
+
 > The grammar for [Literals](../../spec/lexical-structure.md#literals) is extended to include `tuple_literal`:
 
 ```antlr
@@ -16,7 +18,15 @@ literal
     | null_literal
     | tuple_literal // new
     ;
+```
 
+> The following section is added after [The null literal](../../spec/lexical-structure.md#Tuple-literals):
+
+#### Tuple literals
+
+A tuple literal consists of two or more tuple literal elements, each of which may optionally be named.
+
+```antlr
 tuple_literal
     : '(' tuple_literal_element_list ')'
     ;
@@ -31,7 +41,86 @@ tuple_literal_element
     ;
 ```
 
-Note that because it is not a constant expression, a tuple literal cannot be used as default value for an optional parameter.
+A tuple literal is *target typed* whenever possible; that is, its type is determined by the context in which it is used. [[If the term target-typed is specific to this context, we probably need a complete definition here.]]
+
+\[Example:
+```csharp
+var t1 = (0, 2);              // infer tuple type from values
+var t2 = (sum: 0, count: 1);  // infer tuple type from names and values
+```
+end example\]
+
+A tuple literal has a "conversion from expression" to any tuple type having the same number of elements, as long as each of the element expressions of the tuple literal has an implicit conversion to the type of the corresponding element of the tuple type.
+
+\[Example:
+```csharp
+(string name, byte age) t = (null, 5); // OK: the expressions null and 5 convert to string and byte, respectively
+```
+end example\]
+
+In cases where a tuple literal is not part of a conversion, it acquires its *natural type*, which means a tuple type where the element types are the types of the constituent expressions, in lexical order. Since not all expressions have types, not all tuple literals have a natural type either: [[Is natural type specific to tuples? Need we say more about this term?]]
+
+\[Example:
+```csharp
+var t = ("John", 5); // OK: the type of t is (string, int)
+var t = (null, 5); //   Error: null doesn't have a type
+```
+end example\]
+
+If a tuple literal includes element names, those names become part of the natural type: [[Check this, 'cos they will be ignored if they are different from the names in the target type]]
+
+\[Example:
+```csharp
+var t = (name: "John", age: 5); // The type of t is (string name, int age)
+```
+end example\]
+
+A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). As such, a tuple literal cannot be used as the default value for an optional parameter. [[Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.]]
+
+
+
+
+
+[[I think this belongs with types|tuple|initializers)]]
+
+Tuple literals may be deconstructed directly:
+
+\[Example:
+```csharp
+(string x, byte y, var z) = (null, 1, 2);
+(string x, byte y) t = (null, 1);
+```
+end example\]
+
+[[I think this belongs in expressions|assignment)]]
+
+Or for deconstructing assignment:
+
+\[Example:
+```csharp
+string x;
+byte y;
+
+(x, y) = (null, 1);
+(x, y) = (y, x); // swap!
+```
+end example\]
+
+The evaluation order of deconstruction assignment expressions is "breadth first":
+
+1. Evaluate the LHS: Evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
+1. Evaluate the RHS: Evaluate each of the expressions inside of it one by one, left to right to yield side effects
+1. Convert each of the RHS expressions to the LHS types expected, one by one, left to right.
+1. Assign each of the conversion results from 3 to the storage locations found in 
+
+> **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
+
+A deconstructing assignment is a *statement-expression* whose type could be `void`.
+
+
+
+
+
 
 ## Changes to [Types](../../spec/types.md)
 
@@ -111,61 +200,6 @@ var t1 = (sum: 0, count: 1); // OK, all fields are named
 var t2 = (sum: 0, 1);       // Ok, implies (int sum, int);
 var t3 = (sum: 0, sum: 1);  // error! duplicate names.
 ```
-
-### Tuple literals
-
-```csharp
-var t1 = (0, 2);              // infer tuple type from values
-var t2 = (sum: 0, count: 1);  // infer tuple type from names and values
-```
-
-A tuple literal is "target typed" whenever possible. The tuple literal has a "conversion from expression" to any tuple type, as long as the element expressions of the tuple literal have an implicit conversion to the element types of the tuple type.
-
-```csharp
-(string name, byte age) t = (null, 5); // Ok: the expressions null and 5 convert to string and byte
-```
-
-In cases where the tuple literal is not part of a conversion, it acquires its "natural type", which means a tuple type where the element types are the types of the constituent expressions. Since not all expressions have types, not all tuple literals have a natural type either:
-
-```csharp
-var t = ("John", 5); // Ok: the type of t is (string, int)
-var t = (null, 5); //   Error: null doesn't have a type
-```
-
-A tuple literal may include names, in which case they become part of the natural type:
-
-```csharp
-var t = (name: "John", age: 5); // The type of t is (string name, int age)
-```
-
-Tuple literals may be deconstructed directly:
-
-```csharp
-(string x, byte y, var z) = (null, 1, 2);
-(string x, byte y) t = (null, 1);
-```
-
-Or for deconstructing assignment:
-
-```csharp
-string x;
-byte y;
-
-(x, y) = (null, 1);
-(x, y) = (y, x); // swap!
-```
-
-The evaluation order of deconstruction assignment expressions is "breadth first":
-
-1. Evaluate the LHS: Evaluate each of the expressions inside of it one by one, left to right, to yield side effects and establish a storage location for each.
-1. Evaluate the RHS: Evaluate each of the expressions inside of it one by one, left to right to yield side effects
-1. Convert each of the RHS expressions to the LHS types expected, one by one, left to right.
-1. Assign each of the conversion results from 3 to the storage locations found in 
-
-> **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
-
-A deconstructing assignment is a *statement-expression* whose type could be `void`.
-
 ### Duality with underlying type
 
 Tuples map to underlying types of particular names.
