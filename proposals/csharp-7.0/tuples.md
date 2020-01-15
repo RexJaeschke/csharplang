@@ -41,7 +41,9 @@ tuple_literal_element
     ;
 ```
 
-A tuple literal is *target typed* whenever possible; that is, its type is determined by the context in which it is used. [[If the term target-typed is specific to this context, we probably need a complete definition here.]]
+A tuple literal is *target typed* whenever possible; that is, its type is determined by the context in which it is used.
+
+**ACTION:** If the term target-typed is specific to this context, we probably need a complete definition here.
 
 \[Example:
 ```csharp
@@ -58,7 +60,9 @@ A tuple literal has a "conversion from expression" to any tuple type having the 
 ```
 end example\]
 
-In cases where a tuple literal is not part of a conversion, it acquires its *natural type*, which means a tuple type where the element types are the types of the constituent expressions, in lexical order. Since not all expressions have types, not all tuple literals have a natural type either: [[Is natural type specific to tuples? Need we say more about this term?]]
+In cases where a tuple literal is not part of a conversion, it acquires its *natural type*, which means a tuple type where the element types are the types of the constituent expressions, in lexical order. Since not all expressions have types, not all tuple literals have a natural type either:
+
+**ACTION:** Is natural type specific to tuples? Need we say more about this term?
 
 \[Example:
 ```csharp
@@ -67,7 +71,9 @@ var t = (null, 5); //   Error: null doesn't have a type
 ```
 end example\]
 
-If a tuple literal includes element names, those names become part of the natural type: [[Check this, 'cos they will be ignored if they are different from the names in the target type]]
+If a tuple literal includes element names, those names become part of the natural type: 
+
+**ACTION:** Check this, 'cos they will be ignored if they are different from the names in the target type
 
 \[Example:
 ```csharp
@@ -75,13 +81,15 @@ var t = (name: "John", age: 5); // The type of t is (string name, int age)
 ```
 end example\]
 
-A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). As such, a tuple literal cannot be used as the default value for an optional parameter. [[Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.]]
+A tuple literal is *not* a [constant expression](../../spec/expressions.md#Constant-expressions). As such, a tuple literal cannot be used as the default value for an optional parameter.
+
+**ACTION:** Consider removing the second sentence above, as it sounds like just one example of usage prohibition (rather than a spec requirement); there likely are others. If that is true, either completely omit that sentence, or delete it from here and add an example showing that such a usage fails.
 
 
 
 
 
-[[I think this belongs with types|tuple|initializers)]]
+**ACTION:** I think this belongs with types|tuple|initializers)
 
 Tuple literals may be deconstructed directly:
 
@@ -92,7 +100,7 @@ Tuple literals may be deconstructed directly:
 ```
 end example\]
 
-[[I think this belongs in expressions|assignment)]]
+**ACTION:** I think this belongs in expressions|assignment)
 
 Or for deconstructing assignment:
 
