@@ -20,11 +20,11 @@ literal
     ;
 ```
 
-> The following section is added after [The null literal](../../spec/lexical-structure.md#Tuple-literals):
+> The following section is added after [The null literal](../../spec/lexical-structure.md#The-null-literal):
 
 #### Tuple literals
 
-A tuple literal consists of two or more tuple literal elements, each of which may optionally be named.
+A tuple literal consists of two or more tuple literal elements, each of which is optionally named.
 
 ```antlr
 tuple_literal
@@ -67,7 +67,7 @@ In cases where a tuple literal is not part of a conversion, it acquires its *nat
 \[Example:
 ```csharp
 var t = ("John", 5); // OK: the type of t is (string, int)
-var t = (null, 5); //   Error: null doesn't have a type
+var t = (null, 5);   // Error: null doesn't have a type
 ```
 end example\]
 
@@ -89,9 +89,11 @@ A tuple literal is *not* a [constant expression](../../spec/expressions.md#Const
 
 
 
-**ACTION:** I think this belongs with types|tuple|initializers)
+**ACTION:** I think the following belongs with deconstruction)
 
 Tuple literals may be deconstructed directly:
+
+**ACTION:** Do we need to say this? After all, a tuple literal is a tuple, and a tuple can be deconstructed. 
 
 \[Example:
 ```csharp
@@ -124,11 +126,6 @@ The evaluation order of deconstruction assignment expressions is "breadth first"
 > **Note to reviewers**: I found this in the LDM notes for July 13-16, 2016. I don't think it is still accurate:
 
 A deconstructing assignment is a *statement-expression* whose type could be `void`.
-
-
-
-
-
 
 ## Changes to [Types](../../spec/types.md)
 
