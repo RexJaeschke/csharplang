@@ -141,7 +141,17 @@ value_type
     | enum_type
     | tuple_type // new
     ;
+```
 
+## Additions to [Types](../../spec/types.md)
+
+> Add the following sections after [Nullable types](../../spec/types.md#nullable-types) (at the end of the current *Value types* section.)
+
+### Tuple types
+
+A tuple type is declared using the following syntax:
+
+```antlr
 tuple_type
     : '(' tuple_type_element_list ')'
     ;
@@ -156,38 +166,23 @@ tuple_type_element
     ;
 ```
 
-## Additions to [Types](../../spec/types.md)
+A ***tuple*** is an anonymous data structure type that contains a sequence of two or more ***elements***. Each element is public and may have any type. Each unique, lexically ordered combination of element types designates a distinct tuple type.
 
-> The following sections should be added after [Nullable types](../../spec/types.md#nullable-types) (at the end of the current *Value types* section.)
+The elements in a tuple are accessed using the [member-access operator `.`](../../spec/expressions.md#Member-access).
 
-### Tuple types
-
-Tuple types are declared with the following syntax:
+Given the following,
 
 ```csharp
-public (int sum, int count) Tally(IEnumerable<int> values) { ... }
-
-var t = Tally(myValues);
-Console.WriteLine($"Sum: {t.sum}, count: {t.count}");
+(int code, string message) pair1 = (3, "hello");
  ```
 
-The syntax `(int sum, int count)` indicates an anonymous data structure with public fields of the given names and types, referred to as *tuple*.
+the syntax `(int code, string message)` declares a tuple type having two elements, each with the given name and type.
 
-Tuple values can be created using *tuple literals*:
+As shown, a tuple can be initialized using a [tuple literal](../../spec/lexical-structure.md#literals). A tuple cannot be created with the `new` operator. However, the `new` operator can be used to create and initialize an array of tuple or a nullable tuple.
 
-```csharp
-var t1 = (sum: 0, count: 1);
-var t2 = (0, 1);     // field names are optional
-```
+A tuple can be created for a known target type:
 
-Tuples cannot be created with the `new` operator. The `new` operator can be used to initialize arrays of tuples, or nullable tuples:
-
-```csharp
-var array = new (int x, int y)[10];
-var nullable = new (int x, int y)?();
-```
-
-Tuples can be created for a known target type:
+**ACTION:** Come up with a simpler example
 
 ```csharp
 public (int sum, int count) Tally(IEnumerable<int> values)
@@ -198,17 +193,26 @@ public (int sum, int count) Tally(IEnumerable<int> values)
 }
 ```
 
-Specifying field names is optional. Duplicate names are disallowed.
+An element need not have a name. Element names within a tuple type shall be distinct.
 
+**ACTION:** add text covering all elemetns names, some elements named, no elements named, ...
+
+\[Example:
 ```csharp
 var t1 = (sum: 0, count: 1); // OK, all fields are named
-var t2 = (sum: 0, 1);       // Ok, implies (int sum, int);
-var t3 = (sum: 0, sum: 1);  // error! duplicate names.
+var t2 = (sum: 0, 1);        // Ok, implies (int sum, int);
+var t3 = (sum: 0, sum: 1);   // error! duplicate names.
+(int e1, (int e1, int e2) e2) t4 = (10, (20, 30)); // OK. element names at each "level" are distinct
 ```
+end example\]
+
+
+
 ### Duality with underlying type
 
 Tuples map to underlying types of particular names.
 
+\[Example:
 ```csharp
 System.ValueTuple<T1, T2>
 System.ValueTuple<T1, T2, T3>
@@ -218,6 +222,7 @@ System.ValueTuple<T1, T2, T3,..., T7, TRest>
 
 Tuple types behave exactly like underlying types. The only additional enhancement is the more expressive field names given by the programmer.
 
+\[Example:
 ```csharp
 var t = (sum: 0, count: 1);
 t.sum   = 1;        // sum   is the name for the field #1
